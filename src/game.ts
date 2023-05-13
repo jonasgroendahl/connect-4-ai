@@ -1,28 +1,21 @@
 import prompt from "prompt-sync";
+import { Board, BoardPosition, GameOutcome, Move, Player } from "./types";
+import { aiMove } from "./ai";
 
 const promptSync = prompt();
 
-type Player = "X" | "O";
-
-type GameOutcome = Player | "DRAW";
-
-type BoardPosition = null | Player;
-
-type Board = [
-  [BoardPosition, BoardPosition, BoardPosition, BoardPosition],
-  [BoardPosition, BoardPosition, BoardPosition, BoardPosition],
-  [BoardPosition, BoardPosition, BoardPosition, BoardPosition],
-  [BoardPosition, BoardPosition, BoardPosition, BoardPosition],
-  [BoardPosition, BoardPosition, BoardPosition, BoardPosition]
-];
-
 const board: Board = [
-  [null, null, null, null],
-  [null, null, null, null],
-  [null, null, null, null],
-  [null, null, null, null],
-  [null, null, null, null],
+  [null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null],
 ];
+
+const printBoard = () => {
+  console.table(board);
+};
 
 const getAvailableMoves = () => {
   const availableMoves: [number, number][] = [];
@@ -48,7 +41,9 @@ const coordsCheck = (
   third: BoardPosition,
   fourth: BoardPosition
 ) => {
-  for (const player of ["X", "O"]) {
+  const players: Player[] = ["AI", "HUMAN"];
+
+  for (const player of players) {
     if (
       first === player &&
       second === player &&
@@ -118,8 +113,23 @@ const checkIfWinner = () => {
   return undefined;
 };
 
+const validateUserMove = (
+  moves: [number, number][],
+  command: string
+): { x: number; y: number } | undefined => {
+  const userMove = command.split(",").map((coord) => Number(coord));
+
+  const moveIsAmongAvailableMoves = Boolean(
+    moves.find((m) => userMove[0] === m[0] && userMove[1] === m[1])
+  );
+
+  return moveIsAmongAvailableMoves
+    ? { x: userMove[0], y: userMove[1] }
+    : undefined;
+};
+
 const main = () => {
-  let usersTurn: Player = "O";
+  let usersTurn: Player = "AI";
 
   console.log(
     "Welcome to Connect 4. When it is your turn, type coordinates as follows: x,y "
@@ -129,31 +139,41 @@ const main = () => {
   let outcome: GameOutcome = "DRAW";
 
   while (gameIsRunning) {
-    const move = promptSync(`${usersTurn}'s turn: `);
-
     const moves = getAvailableMoves();
 
-    const userMove = move.split(",").map((coord) => Number(coord));
+    let move: Move | undefined = undefined;
 
-    if (moves.find((m) => userMove[0] === m[0] && userMove[1] === m[1])) {
-      board[userMove[0]][userMove[1]] = usersTurn;
-
-      const winner = checkIfWinner();
-
-      if (winner || moves.length === 1) {
-        gameIsRunning = false;
-
-        if (winner) outcome = winner;
-      }
-
-      if (usersTurn === "O") {
-        usersTurn = "X";
-      } else {
-        usersTurn = "O";
-      }
+    if (usersTurn === "HUMAN") {
+      const moveCommand = promptSync(`👋 User's turn: `);
+      move = validateUserMove(moves, moveCommand);
     } else {
-      console.log("Received invalid input. Try again");
+      move = aiMove(board, moves);
     }
+
+    if (!move) {
+      console.log("Received invalid input. Try again 👇");
+      continue;
+    }
+
+    board[move.x][move.y] = usersTurn;
+
+    const winner = checkIfWinner();
+
+    console.log("winner", winner);
+
+    if (winner || moves.length === 1) {
+      gameIsRunning = false;
+
+      if (winner) outcome = winner;
+    }
+
+    if (usersTurn === "HUMAN") {
+      usersTurn = "AI";
+    } else {
+      usersTurn = "HUMAN";
+    }
+
+    printBoard();
   }
 
   console.log(
