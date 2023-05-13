@@ -159,8 +159,6 @@ const main = () => {
 
     const winner = checkIfWinner();
 
-    console.log("winner", winner);
-
     if (winner || moves.length === 1) {
       gameIsRunning = false;
 
