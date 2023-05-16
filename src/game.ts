@@ -117,22 +117,24 @@ const validateUserMove = (
   moves: [number, number][],
   command: string
 ): { x: number; y: number } | undefined => {
-  const userMove = command.split(",").map((coord) => Number(coord));
+  const userMove = Number(command);
 
-  const moveIsAmongAvailableMoves = Boolean(
-    moves.find((m) => userMove[0] === m[0] && userMove[1] === m[1])
-  );
+  const aLegitMove = moves.find(function (move) {
+    if (move[1] === userMove) {
+      return move;
+    }
 
-  return moveIsAmongAvailableMoves
-    ? { x: userMove[0], y: userMove[1] }
-    : undefined;
+    return false;
+  });
+
+  return aLegitMove ? { x: aLegitMove[0], y: aLegitMove[1] } : undefined;
 };
 
 const main = () => {
   let usersTurn: Player = "AI";
 
   console.log(
-    "Welcome to Connect 4. When it is your turn, type coordinates as follows: x,y "
+    "Welcome to Connect 4. When it is your turn, type coordinates as follows: x"
   );
 
   let gameIsRunning = true;
@@ -140,6 +142,8 @@ const main = () => {
 
   while (gameIsRunning) {
     const moves = getAvailableMoves();
+
+    console.log(moves);
 
     let move: Move | undefined = undefined;
 
