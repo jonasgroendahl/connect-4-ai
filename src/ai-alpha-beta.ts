@@ -69,10 +69,12 @@ function scorePositionGpt(
   return score;
 }
 
-export const miniMax = (
+export const miniMaxAlphaBeta = (
   board: Board,
   depth: number,
-  isMaximizingPlayer: boolean
+  isMaximizingPlayer: boolean,
+  alpha: number,
+  beta: number
 ): number => {
   const moves = getAvailableMoves(board);
   const winner = checkIfWinner(board);
@@ -107,11 +109,16 @@ export const miniMax = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = miniMax(board, depth - 1, false);
+      const score = miniMaxAlphaBeta(board, depth - 1, false, alpha, beta);
 
       board[x][y] = null;
 
       valueMax = Math.max(score, valueMax);
+
+      alpha = Math.max(alpha, valueMax);
+      if (alpha >= beta) {
+        break;
+      }
     }
     return valueMax;
   } else {
@@ -120,11 +127,17 @@ export const miniMax = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = miniMax(board, depth - 1, true);
+      const score = miniMaxAlphaBeta(board, depth - 1, true, alpha, beta);
 
       board[x][y] = null;
 
       valueMin = Math.min(score, valueMin);
+
+      beta = Math.min(beta, valueMin);
+
+      if (alpha >= beta) {
+        break;
+      }
     }
     return valueMin;
   }
