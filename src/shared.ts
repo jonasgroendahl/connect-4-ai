@@ -9,8 +9,8 @@ export const board: Board = [
   [null, null, null, null, null, null, null],
 ];
 
-const ROW_LENGTH = board[0].length;
-const COLUMN_LENGTH = board.length;
+export const ROW_LENGTH = board[0].length;
+export const COLUMN_LENGTH = board.length;
 
 export const getAvailableMoves = (board: Board) => {
   const availableMoves: [number, number][] = [];

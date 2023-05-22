@@ -7,6 +7,10 @@ import {
   validateUserMove,
 } from "./shared";
 import { miniMax } from "./ai";
+import { aiRandomMove } from "./ai-random";
+import { miniMaxSimple } from "./ai-simple";
+import { miniMaxSimpleAlphaBeta } from "./ai-simple-alpha-beta";
+import { miniMaxCenter } from "./ai-score-center";
 
 const promptSync = prompt();
 
@@ -30,14 +34,18 @@ const main = () => {
       move = validateUserMove(moves, moveCommand);
     } else {
       let bestMove = moves[0];
-      let bestScore = 0;
+      let bestScore = -Infinity;
 
       // go through all available moves, find the one with highest score
       for (const move of moves) {
         const [x, y] = move;
 
         board[x][y] = "AI";
-        const score = miniMax(board, 6, false);
+
+        console.log("move", move);
+        const score = miniMaxCenter(board, 2, false);
+        console.log("score", score);
+
         board[x][y] = null;
 
         if (score > bestScore) {
@@ -47,6 +55,8 @@ const main = () => {
       }
 
       move = bestMove;
+
+      //move = aiRandomMove(board, moves);
     }
 
     if (!move) {

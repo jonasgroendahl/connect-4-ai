@@ -1,3 +1,4 @@
+import { miniMax } from "./ai";
 import { checkIfWinner, getAvailableMoves } from "./shared";
 import { Board, Player } from "./types";
 
@@ -109,7 +110,7 @@ export const miniMaxAlphaBeta = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = miniMaxAlphaBeta(board, depth - 1, false, alpha, beta);
+      const score = miniMax(board, depth - 1, false);
 
       board[x][y] = null;
 
