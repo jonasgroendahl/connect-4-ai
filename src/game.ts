@@ -43,7 +43,7 @@ const main = () => {
         board[x][y] = "AI";
 
         console.log("move", move);
-        const score = miniMaxCenter(board, 2, false);
+        const score = miniMaxCenter(board, 4, false);
         console.log("score", score);
 
         board[x][y] = null;

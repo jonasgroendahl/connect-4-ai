@@ -6,26 +6,18 @@ import {
 } from "./shared";
 import { Board, Player } from "./types";
 
-const scorePosition = (
-  board: Board,
-  move: [number, number],
-  player: Player
-) => {
-  let numberOfPlayerTurns = 0;
+const scorePosition = (board: Board, player: Player) => {
+  let score = 0;
 
   for (let i = 0; i < COLUMN_LENGTH; i++) {
     for (let j = 0; j < ROW_LENGTH; j++) {
-      if (board[i][j] !== null) {
-        numberOfPlayerTurns++;
+      if (board[i][j] === player && j >= 2 && j <= 4) {
+        score++;
       }
     }
   }
 
-  if (move[1] >= 3 && move[1] <= 4) {
-    return player === "AI" ? 20 : -20;
-  }
-
-  return 0;
+  return score;
 };
 
 export const miniMaxCenter = (
@@ -49,11 +41,7 @@ export const miniMaxCenter = (
     }
 
     if (depth === 0) {
-      return scorePosition(
-        board,
-        moves[0],
-        isMaximizingPlayer ? "HUMAN" : "AI"
-      );
+      return scorePosition(board, isMaximizingPlayer ? "HUMAN" : "AI");
     }
 
     return 0;
