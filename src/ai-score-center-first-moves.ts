@@ -6,21 +6,35 @@ import {
 } from "./shared";
 import { Board, Player } from "./types";
 
+// NEEDS SOME WORK
+
 const scorePosition = (board: Board) => {
   let score = 0;
+  let movesMade = 0;
 
   for (let i = 0; i < COLUMN_LENGTH; i++) {
     for (let j = 0; j < ROW_LENGTH; j++) {
       if (board[i][j] === "AI" && j >= 2 && j <= 4) {
-        score += 2;
+        score++; // Score the position as before
+      }
+
+      if (!board[i][j]) {
+        movesMade++; // Count the empty slots as moves made
       }
     }
+  }
+
+  // Adjust the scoring based on the number of moves made
+  if (movesMade <= 5) {
+    score *= 2; // Give a higher score for the first 5 moves
+  } else {
+    score *= 0.5; // Give a lower score for subsequent moves
   }
 
   return score;
 };
 
-export const miniMaxCenter = (
+export const miniMaxCenterFirstMoves = (
   board: Board,
   depth: number,
   isMaximizingPlayer: boolean
@@ -53,7 +67,7 @@ export const miniMaxCenter = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = miniMaxCenter(board, depth - 1, false);
+      const score = miniMaxCenterFirstMoves(board, depth - 1, false);
 
       board[x][y] = null;
 
@@ -66,7 +80,7 @@ export const miniMaxCenter = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = miniMaxCenter(board, depth - 1, true);
+      const score = miniMaxCenterFirstMoves(board, depth - 1, true);
 
       board[x][y] = null;
 

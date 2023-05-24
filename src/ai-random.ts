@@ -1,6 +1,4 @@
-import { Board } from "./types";
-
-export const aiRandomMove = (board: Board, moves: [number, number][]) => {
+export const aiRandomMove = (moves: [number, number][]) => {
   const numberOfMoves = moves.length;
 
   const randomInteger = Math.floor(Math.random() * numberOfMoves);
