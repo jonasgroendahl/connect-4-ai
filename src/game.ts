@@ -11,6 +11,7 @@ import { aiRandomMove } from "./ai-random";
 import { miniMaxSimple } from "./ai-simple";
 import { miniMaxSimpleAlphaBeta } from "./ai-simple-alpha-beta";
 import { miniMaxCenter } from "./ai-score-center";
+import { miniMaxCenterFirstMoves } from "./ai-score-center-first-moves";
 
 const promptSync = prompt();
 
@@ -43,7 +44,7 @@ const main = () => {
         board[x][y] = "AI";
 
         console.log("move", move);
-        const score = miniMaxCenter(board, 2, false);
+        const score = miniMaxCenter(board, 1, false);
         console.log("score", score);
 
         board[x][y] = null;
@@ -56,7 +57,7 @@ const main = () => {
 
       move = bestMove;
 
-      //move = aiRandomMove(board, moves);
+      //move = aiRandomMove(moves);
     }
 
     if (!move) {
