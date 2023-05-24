@@ -5,7 +5,9 @@
   "main": "./src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc && node ./dist/game.js"
+    "start": "tsc && node ./dist/game.js",
+    "game2": "tsc && node ./dist/game-2-center-ai.js",
+    "game3": "tsc && node ./dist/game-3-random-ai.js"
   },
   "keywords": [],
   "author": "",
