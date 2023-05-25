@@ -4,7 +4,7 @@ import {
   checkIfWinner,
   getAvailableMoves,
 } from "./shared";
-import { Board, Player } from "./types";
+import { Board } from "./types";
 
 const scorePosition = (board: Board) => {
   let score = 0;

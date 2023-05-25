@@ -12,6 +12,8 @@ import { miniMaxSimple } from "./ai-simple";
 import { miniMaxSimpleAlphaBeta } from "./ai-simple-alpha-beta";
 import { miniMaxCenter } from "./ai-score-center";
 import { miniMaxCenterFirstMoves } from "./ai-score-center-first-moves";
+import { twoInALineAi } from "./ai-score-2-3";
+import { twoInALineAiAlphaBeta } from "./ai-score-2-3-alpha-beta";
 
 const promptSync = prompt();
 
@@ -44,7 +46,13 @@ const main = () => {
         board[x][y] = "AI";
 
         console.log("move", move);
-        const score = miniMaxCenter(board, 1, false);
+        const score = twoInALineAiAlphaBeta(
+          board,
+          10,
+          false,
+          -Infinity,
+          Infinity
+        );
         console.log("score", score);
 
         board[x][y] = null;
