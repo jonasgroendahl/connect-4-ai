@@ -14,6 +14,7 @@ import { miniMaxCenter } from "./ai-score-center";
 import { miniMaxCenterFirstMoves } from "./ai-score-center-first-moves";
 import { twoInALineAi } from "./ai-score-2-3";
 import { twoInALineAiAlphaBeta } from "./ai-score-2-3-alpha-beta";
+import { checkAllFour, fourInALineAi } from "./ai-score-2-3-open-ends";
 
 const promptSync = prompt();
 
@@ -46,13 +47,7 @@ const main = () => {
         board[x][y] = "AI";
 
         console.log("move", move);
-        const score = twoInALineAiAlphaBeta(
-          board,
-          10,
-          false,
-          -Infinity,
-          Infinity
-        );
+        const score = fourInALineAi(board, 5, false);
         console.log("score", score);
 
         board[x][y] = null;
