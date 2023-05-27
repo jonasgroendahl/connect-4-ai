@@ -90,7 +90,9 @@ export const checkAllFour = (board: Board, player: Player) => {
   return score;
 };
 
-export const fourInALineAi = (
+const transTable = new Map();
+
+export const fourInALineAiTransTable = (
   board: Board,
   depth: number,
   isMaximizingPlayer: boolean
@@ -106,7 +108,7 @@ export const fourInALineAi = (
       if (winner === "AI") {
         return 9999999;
       } else {
-        return -99999999;
+        return -9999999;
       }
     }
 
@@ -117,18 +119,28 @@ export const fourInALineAi = (
     return 0;
   }
 
+  const boardKey = JSON.stringify(board);
+
+  if (transTable.has(boardKey)) {
+    return transTable.get(boardKey);
+  }
+
   if (isMaximizingPlayer) {
     let valueMax = -Infinity;
 
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = fourInALineAi(board, depth - 1, false);
+      const score = fourInALineAiTransTable(board, depth - 1, false);
 
       board[x][y] = null;
 
       valueMax = Math.max(score, valueMax);
     }
+
+    // Cache the computed score for the current board position
+    transTable.set(boardKey, valueMax);
+
     return valueMax;
   } else {
     let valueMin = Infinity;
@@ -136,12 +148,16 @@ export const fourInALineAi = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = fourInALineAi(board, depth - 1, true);
+      const score = fourInALineAiTransTable(board, depth - 1, true);
 
       board[x][y] = null;
 
       valueMin = Math.min(score, valueMin);
     }
+
+    // Cache the computed score for the current board position
+    transTable.set(boardKey, valueMin);
+
     return valueMin;
   }
 };

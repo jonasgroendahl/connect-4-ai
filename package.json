@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsc && node ./dist/game.js",
     "game2": "tsc && node ./dist/game-2-center-ai.js",
-    "game3": "tsc && node ./dist/game-3-random-ai.js"
+    "game3": "tsc && node ./dist/game-3-random-ai.js",
+    "game4": "tsc && node ./dist/game-4-iterative-deepening.js"
   },
   "keywords": [],
   "author": "",

@@ -28,7 +28,7 @@ export const miniMaxCenter = (
   const moves = getAvailableMoves(board);
   const winner = checkIfWinner(board);
 
-  const isTerminal = winner || moves.length === 1 || depth === 0;
+  const isTerminal = winner || moves.length === 0 || depth === 0;
 
   if (isTerminal) {
     // check for winners

@@ -16,7 +16,10 @@ import { twoInALineAi } from "./ai-score-2-3";
 import { twoInALineAiAlphaBeta } from "./ai-score-2-3-alpha-beta";
 import { checkAllFour, fourInALineAi } from "./ai-score-2-3-open-ends";
 import { fourInALineAiTransTable } from "./ai-score-2-3-open-ends-transporation-table";
-import { miniMaxBest } from "./ai-minimax-best";
+import {
+  fourInALineAiIterativeDeepning,
+  fourInALineAiIterativeDeepningWithTransportationTable,
+} from "./ai-score-2-3-open-ends-iterative-deepning";
 
 const promptSync = prompt();
 
@@ -30,8 +33,12 @@ const main = () => {
   let gameIsRunning = true;
   let outcome: GameOutcome = "DRAW";
 
+  const timeLimit = 2000; // Time limit in milliseconds
+
   while (gameIsRunning) {
     const moves = getAvailableMoves(board);
+    let currentDepth = 1;
+    const startTime = Date.now();
 
     let move: [number, number] = undefined;
 
@@ -42,27 +49,32 @@ const main = () => {
       let bestMove = moves[0];
       let bestScore = -Infinity;
 
-      // go through all available moves, find the one with highest score
-      for (const move of moves) {
-        const [x, y] = move;
+      while (Date.now() - startTime < timeLimit) {
+        // go through all available moves, find the one with highest score
+        for (const move of moves) {
+          const [x, y] = move;
 
-        board[x][y] = "AI";
+          board[x][y] = "AI";
 
-        console.log("move", move);
-        const score = miniMaxBest(board, 5, false);
-        console.log("score", score);
+          const score = fourInALineAiIterativeDeepningWithTransportationTable(
+            board,
+            currentDepth,
+            false
+          );
 
-        board[x][y] = null;
+          board[x][y] = null;
 
-        if (score > bestScore) {
-          bestScore = score;
-          bestMove = move;
+          if (score > bestScore) {
+            bestScore = score;
+            bestMove = move;
+          }
         }
+        currentDepth++; // Increase the search depth
+
+        move = bestMove;
+
+        //move = aiRandomMove(moves);
       }
-
-      move = bestMove;
-
-      //move = aiRandomMove(moves);
     }
 
     if (!move) {
