@@ -141,8 +141,8 @@ const tests: MainArgs[] = [
     name: "Minimax vs Minimax Alpha Beta - Best minimax - Depth 2",
     algoPlayer1: miniMaxBest,
     algoPlayer2: miniMaxBestAlphaBeta,
-    depthPlayer1: 1,
-    depthPlayer2: 1,
+    depthPlayer1: 2,
+    depthPlayer2: 2,
     playerStarts: "HUMAN",
   },
   {
