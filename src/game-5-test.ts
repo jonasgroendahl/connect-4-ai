@@ -46,7 +46,13 @@ const main = ({
 
         board[x][y] = "HUMAN";
 
-        const score = algoPlayer1(board, depthPlayer1, true);
+        const score = algoPlayer1(
+          board,
+          depthPlayer1,
+          true,
+          -Infinity,
+          Infinity
+        );
 
         board[x][y] = null;
 
