@@ -230,6 +230,88 @@ export const miniMaxBestAlphaBeta = (
   }
 };
 
+const transTable = new Map();
+
+export const miniMaxBestAlphaBetaWithLookupTable = (
+  board: Board,
+  depth: number,
+  isMaximizingPlayer: boolean,
+  alpha: number,
+  beta: number
+) => {
+  const moves = getAvailableMoves(board);
+  const winner = checkIfWinner(board);
+
+  const isTerminal = winner || moves.length === 0 || depth === 0;
+
+  if (isTerminal) {
+    // check for winners
+    if (winner) {
+      if (winner === "AI") {
+        return 9999999;
+      } else {
+        return -99999999;
+      }
+    }
+
+    if (depth === 0) {
+      return scorePosition(board);
+    }
+
+    return 0;
+  }
+
+  const boardKey = JSON.stringify(board);
+
+  if (transTable.has(boardKey)) {
+    return transTable.get(boardKey);
+  }
+
+  if (isMaximizingPlayer) {
+    let valueMax = -Infinity;
+
+    for (const [x, y] of moves) {
+      board[x][y] = "AI";
+
+      const score = miniMaxBestAlphaBeta(board, depth - 1, false, alpha, beta);
+
+      board[x][y] = null;
+
+      valueMax = Math.max(score, valueMax);
+      alpha = Math.max(alpha, valueMax);
+
+      if (beta <= alpha) {
+        break; // Beta cutoff
+      }
+    }
+
+    // Cache the computed score for the current board position
+    transTable.set(boardKey, valueMax);
+    return valueMax;
+  } else {
+    let valueMin = Infinity;
+
+    for (const [x, y] of moves) {
+      board[x][y] = "HUMAN";
+
+      const score = miniMaxBestAlphaBeta(board, depth - 1, true, alpha, beta);
+
+      board[x][y] = null;
+
+      valueMin = Math.min(score, valueMin);
+      beta = Math.min(beta, valueMin);
+
+      if (beta <= alpha) {
+        break; // Alpha cutoff
+      }
+    }
+
+    // Cache the computed score for the current board position
+    transTable.set(boardKey, valueMin);
+    return valueMin;
+  }
+};
+
 /*
 
 To summarize the heuristics that we've tried:
