@@ -1,14 +1,61 @@
-import { Board, GameOutcome, MainArgs, MainReturnType, Player } from "./types";
+import {
+  Board,
+  GameOutcome,
+  MainArgs,
+  MainReturnType,
+  MinimaxAlgo,
+  Player,
+} from "./types";
 import {
   board as crazyBoard,
   checkIfWinner,
   getAvailableMoves,
 } from "./shared";
-import { miniMaxBest, miniMaxBestAlphaBeta } from "./ai-minimax-best";
-import { fourInALineAi } from "./ai-score-2-3-open-ends";
+import {
+  miniMaxBest,
+  miniMaxBestAlphaBeta,
+} from "./heuristics/ai-minimax-best";
+import { miniMaxSecondBest } from "./heuristics/ai-minimax-second-best";
 
 const printBoard = (board: Board) => {
   console.table(board);
+};
+
+const TIME_LIMIT = 300;
+
+// allow the first player to use iterative deepening with this helper
+const performIterativeDeeping = (
+  board: Board,
+  moves: [number, number][],
+  algo: MinimaxAlgo
+) => {
+  let bestMove = moves[0];
+  let bestScore = Infinity;
+  const startTime = Date.now();
+
+  for (let currentDepth = 1; ; currentDepth++) {
+    if (Date.now() - startTime >= TIME_LIMIT) {
+      // Time limit reached, stop searching
+      break;
+    }
+    // go through all available moves, find the one with highest score
+    for (const move of moves) {
+      const [x, y] = move;
+
+      board[x][y] = "HUMAN";
+
+      const score = algo(board, currentDepth, true, -Infinity, Infinity);
+
+      board[x][y] = null;
+
+      if (score < bestScore) {
+        bestScore = score;
+        bestMove = move;
+      }
+    }
+  }
+
+  return bestMove;
 };
 
 const main = ({
@@ -18,6 +65,7 @@ const main = ({
   depthPlayer2,
   name,
   playerStarts,
+  iterativePlayer1,
 }: MainArgs): MainReturnType => {
   const board = JSON.parse(JSON.stringify(crazyBoard)) as Board;
 
@@ -40,25 +88,29 @@ const main = ({
 
       const startTime = process.hrtime();
 
-      // go through all available moves, find the one with highest score
-      for (const move of moves) {
-        const [x, y] = move;
+      if (iterativePlayer1) {
+        bestMove = performIterativeDeeping(board, moves, algoPlayer1);
+      } else {
+        // go through all available moves, find the one with highest score
+        for (const move of moves) {
+          const [x, y] = move;
 
-        board[x][y] = "HUMAN";
+          board[x][y] = "HUMAN";
 
-        const score = algoPlayer1(
-          board,
-          depthPlayer1,
-          true,
-          -Infinity,
-          Infinity
-        );
+          const score = algoPlayer1(
+            board,
+            depthPlayer1,
+            true,
+            -Infinity,
+            Infinity
+          );
 
-        board[x][y] = null;
+          board[x][y] = null;
 
-        if (score < bestScore) {
-          bestScore = score;
-          bestMove = move;
+          if (score < bestScore) {
+            bestScore = score;
+            bestMove = move;
+          }
         }
       }
       const endTime = process.hrtime(startTime);
@@ -130,6 +182,15 @@ const main = ({
 
 const tests: MainArgs[] = [
   {
+    name: "Minimax vs Minimax - Best minimax - Depth 3",
+    algoPlayer1: miniMaxBest,
+    algoPlayer2: miniMaxBest,
+    depthPlayer1: 3,
+    depthPlayer2: 3,
+    playerStarts: "AI",
+    iterativePlayer1: true,
+  },
+  {
     name: "Minimax vs Minimax Alpha Beta - Best minimax - Depth 3",
     algoPlayer1: miniMaxBest,
     algoPlayer2: miniMaxBestAlphaBeta,
@@ -148,7 +209,7 @@ const tests: MainArgs[] = [
   {
     name: "Minimax best vs 2-3-opens-ends - Depth 3 vs depth 3",
     algoPlayer1: miniMaxBest,
-    algoPlayer2: fourInALineAi,
+    algoPlayer2: miniMaxSecondBest,
     depthPlayer1: 3,
     depthPlayer2: 3,
     playerStarts: "HUMAN",
@@ -156,7 +217,7 @@ const tests: MainArgs[] = [
   {
     name: "Minimax best vs 2-3-opens-ends - Depth 3 vs depth 4",
     algoPlayer1: miniMaxBest,
-    algoPlayer2: fourInALineAi,
+    algoPlayer2: miniMaxSecondBest,
     depthPlayer1: 3,
     depthPlayer2: 4,
     playerStarts: "HUMAN",
@@ -164,7 +225,7 @@ const tests: MainArgs[] = [
   {
     name: "Minimax best vs 2-3-opens-ends - Depth 2 vs depth 4",
     algoPlayer1: miniMaxBest,
-    algoPlayer2: fourInALineAi,
+    algoPlayer2: miniMaxSecondBest,
     depthPlayer1: 2,
     depthPlayer2: 4,
     playerStarts: "HUMAN",
@@ -172,7 +233,7 @@ const tests: MainArgs[] = [
   {
     name: "Minimax best vs 2-3-opens-ends - Depth 3 vs depth 2",
     algoPlayer1: miniMaxBest,
-    algoPlayer2: fourInALineAi,
+    algoPlayer2: miniMaxBestAlphaBeta,
     depthPlayer1: 3,
     depthPlayer2: 2,
     playerStarts: "HUMAN",
@@ -187,7 +248,7 @@ const runTests = () => {
     let outcomes: GameOutcome[] = [];
     let timeSpent = [0, 0];
 
-    while (round <= 10) {
+    while (round <= 3) {
       const result = main(test);
       outcomes.push(result.outcome);
       timeSpent[0] += result.timeSpentPlayer1;

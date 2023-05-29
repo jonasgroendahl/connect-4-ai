@@ -3,84 +3,65 @@ import {
   ROW_LENGTH,
   checkIfWinner,
   getAvailableMoves,
-} from "./shared";
-import { Board, BoardPosition, Player } from "./types";
+} from "../shared";
+import { Board, BoardPosition, Player } from "../types";
 
-const PLAYER_SCORE = 2;
-const EMPTY_SORE = 0.5;
-
-const coordsCheckFourPositions = (
+const coordsCheckThree = (
   first: BoardPosition,
   second: BoardPosition,
   third: BoardPosition | undefined,
-  fourth: BoardPosition | undefined,
   player: Player
 ) => {
-  let score = 0;
-
-  for (const postion of [first, second, third, fourth]) {
-    if (postion !== null && postion !== player) {
-      // another player
-      return 0;
-    }
-
-    if (postion === player) {
-      score += PLAYER_SCORE;
-    }
-
-    if (postion === null) {
-      score += EMPTY_SORE;
-    }
+  if (first === player && second === player && third === player) {
+    return 8;
+  } else if (first === player && second === player) {
+    return 2;
   }
 
-  return score;
+  return 0;
 };
 
-export const checkAllFour = (board: Board, player: Player) => {
+export const checkIfTwoOrThreeInRow = (board: Board, player: Player) => {
   let score = 0;
 
   for (let i = 0; i < COLUMN_LENGTH; i++) {
     for (let j = 0; j < ROW_LENGTH; j++) {
       // check horizontal win - bounds check
-      if (j < ROW_LENGTH - 3) {
-        score += coordsCheckFourPositions(
+      if (j < ROW_LENGTH - 2) {
+        score += coordsCheckThree(
           board[i][j],
           board[i][j + 1],
           board[i][j + 2],
-          board[i][j + 3],
           player
         );
       }
 
       // check vertical win - bounds check
-      if (i < COLUMN_LENGTH - 3) {
-        score += coordsCheckFourPositions(
+      if (i < COLUMN_LENGTH - 2) {
+        score += coordsCheckThree(
           board[i][j],
           board[i + 1][j],
           board[i + 2][j],
-          board[i + 3][j],
           player
         );
       }
 
       // check diagonal rising - bounds check
-      if (j < ROW_LENGTH - 3 && i > COLUMN_LENGTH - 3) {
-        score += coordsCheckFourPositions(
+      if (j < ROW_LENGTH - 2 && i > COLUMN_LENGTH - 2) {
+        score += coordsCheckThree(
           board[i][j],
           board[i - 1][j + 1],
           board[i - 2][j + 2],
-          board[i - 3][j + 3],
           player
         );
       }
 
       // diagonal falling - bounds check
-      if (j > COLUMN_LENGTH - 3 && i > COLUMN_LENGTH - 3) {
-        score += coordsCheckFourPositions(
+      if (j > COLUMN_LENGTH - 2 && i > COLUMN_LENGTH - 2) {
+        score += coordsCheckThree(
           board[i][j],
           board[i - 1][j - 1],
           board[i - 2][j - 2],
-          board[i - 3][j - 3],
           player
         );
       }
@@ -90,9 +71,7 @@ export const checkAllFour = (board: Board, player: Player) => {
   return score;
 };
 
-const transTable = new Map();
-
-export const fourInALineAiTransTable = (
+export const miniMaxThreePos = (
   board: Board,
   depth: number,
   isMaximizingPlayer: boolean
@@ -100,7 +79,7 @@ export const fourInALineAiTransTable = (
   const moves = getAvailableMoves(board);
   const winner = checkIfWinner(board);
 
-  const isTerminal = winner || moves.length === 0 || depth === 0;
+  const isTerminal = winner || moves.length === 1 || depth === 0;
 
   if (isTerminal) {
     // check for winners
@@ -108,21 +87,15 @@ export const fourInALineAiTransTable = (
       if (winner === "AI") {
         return 9999999;
       } else {
-        return -9999999;
+        return -99999999;
       }
     }
 
     if (depth === 0) {
-      return checkAllFour(board, "AI");
+      return checkIfTwoOrThreeInRow(board, "AI");
     }
 
     return 0;
-  }
-
-  const boardKey = JSON.stringify(board);
-
-  if (transTable.has(boardKey)) {
-    return transTable.get(boardKey);
   }
 
   if (isMaximizingPlayer) {
@@ -131,16 +104,12 @@ export const fourInALineAiTransTable = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = fourInALineAiTransTable(board, depth - 1, false);
+      const score = miniMaxThreePos(board, depth - 1, false);
 
       board[x][y] = null;
 
       valueMax = Math.max(score, valueMax);
     }
-
-    // Cache the computed score for the current board position
-    transTable.set(boardKey, valueMax);
-
     return valueMax;
   } else {
     let valueMin = Infinity;
@@ -148,16 +117,12 @@ export const fourInALineAiTransTable = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = fourInALineAiTransTable(board, depth - 1, true);
+      const score = miniMaxThreePos(board, depth - 1, true);
 
       board[x][y] = null;
 
       valueMin = Math.min(score, valueMin);
     }
-
-    // Cache the computed score for the current board position
-    transTable.set(boardKey, valueMin);
-
     return valueMin;
   }
 };

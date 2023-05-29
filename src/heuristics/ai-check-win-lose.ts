@@ -1,17 +1,15 @@
-import { checkIfWinner, getAvailableMoves } from "./shared";
-import { Board } from "./types";
+import { checkIfWinner, getAvailableMoves } from "../shared";
+import { Board } from "../types";
 
-export const miniMaxSimpleAlphaBeta = (
+export const miniMaxCheckWinLose = (
   board: Board,
   depth: number,
-  isMaximizingPlayer: boolean,
-  alpha: number,
-  beta: number
+  isMaximizingPlayer: boolean
 ): number => {
   const moves = getAvailableMoves(board);
   const winner = checkIfWinner(board);
 
-  const isTerminal = winner || moves.length === 1 || depth === 0;
+  const isTerminal = winner || moves.length === 0 || depth === 0;
 
   if (isTerminal) {
     // check for winners
@@ -32,22 +30,11 @@ export const miniMaxSimpleAlphaBeta = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = miniMaxSimpleAlphaBeta(
-        board,
-        depth - 1,
-        false,
-        alpha,
-        beta
-      );
+      const score = miniMaxCheckWinLose(board, depth - 1, false);
 
       board[x][y] = null;
 
       valueMax = Math.max(score, valueMax);
-
-      alpha = Math.max(alpha, valueMax);
-      if (alpha >= beta) {
-        break;
-      }
     }
     return valueMax;
   } else {
@@ -56,17 +43,11 @@ export const miniMaxSimpleAlphaBeta = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = miniMaxSimpleAlphaBeta(board, depth - 1, true, alpha, beta);
+      const score = miniMaxCheckWinLose(board, depth - 1, true);
 
       board[x][y] = null;
 
       valueMin = Math.min(score, valueMin);
-
-      beta = Math.min(beta, valueMin);
-
-      if (alpha >= beta) {
-        break;
-      }
     }
     return valueMin;
   }

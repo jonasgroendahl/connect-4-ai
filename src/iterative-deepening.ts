@@ -1,25 +1,12 @@
 import prompt from "prompt-sync";
-import { Board, BoardPosition, GameOutcome, Player } from "./types";
+import { Board, GameOutcome, Player } from "./types";
 import {
   board,
   checkIfWinner,
   getAvailableMoves,
   validateUserMove,
 } from "./shared";
-import { miniMax } from "./ai";
-import { aiRandomMove } from "./ai-random";
-import { miniMaxSimple } from "./ai-simple";
-import { miniMaxSimpleAlphaBeta } from "./ai-simple-alpha-beta";
-import { miniMaxCenter } from "./ai-score-center";
-import { miniMaxCenterFirstMoves } from "./ai-score-center-first-moves";
-import { twoInALineAi } from "./ai-score-2-3";
-import { twoInALineAiAlphaBeta } from "./ai-score-2-3-alpha-beta";
-import { checkAllFour, fourInALineAi } from "./ai-score-2-3-open-ends";
-import { fourInALineAiTransTable } from "./ai-score-2-3-open-ends-transporation-table";
-import {
-  fourInALineAiIterativeDeepning,
-  fourInALineAiIterativeDeepningWithTransportationTable,
-} from "./ai-score-2-3-open-ends-iterative-deepning";
+import { miniMaxBest } from "./heuristics/ai-minimax-best";
 
 const promptSync = prompt();
 
@@ -27,13 +14,13 @@ const printBoard = (board: Board) => {
   console.table(board);
 };
 
+const TIME_LIMIT = 2000; // Time limit in milliseconds
+
 const main = () => {
   let usersTurn: Player = "AI";
 
   let gameIsRunning = true;
   let outcome: GameOutcome = "DRAW";
-
-  const timeLimit = 2000; // Time limit in milliseconds
 
   while (gameIsRunning) {
     const moves = getAvailableMoves(board);
@@ -49,18 +36,14 @@ const main = () => {
       let bestMove = moves[0];
       let bestScore = -Infinity;
 
-      while (Date.now() - startTime < timeLimit) {
+      while (Date.now() - startTime < TIME_LIMIT) {
         // go through all available moves, find the one with highest score
         for (const move of moves) {
           const [x, y] = move;
 
           board[x][y] = "AI";
 
-          const score = fourInALineAiIterativeDeepningWithTransportationTable(
-            board,
-            currentDepth,
-            false
-          );
+          const score = miniMaxBest(board, currentDepth, false);
 
           board[x][y] = null;
 

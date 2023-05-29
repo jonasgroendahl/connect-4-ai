@@ -63,7 +63,7 @@ export type Board = [
 
 export type Move = { x: number; y: number };
 
-type MinimaxAlgo = (
+export type MinimaxAlgo = (
   Board: Board,
   depth: number,
   isMaximizingPlayer: boolean,
@@ -78,6 +78,7 @@ export type MainArgs = {
   depthPlayer1: number;
   depthPlayer2: number;
   playerStarts?: Player;
+  iterativePlayer1?: boolean;
 };
 
 export type MainReturnType = {

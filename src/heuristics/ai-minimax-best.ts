@@ -3,8 +3,8 @@ import {
   ROW_LENGTH,
   checkIfWinner,
   getAvailableMoves,
-} from "./shared";
-import { Board, Player } from "./types";
+} from "../shared";
+import { Board, Player } from "../types";
 
 const scorePosition = (board: Board): number => {
   let score = 0;
@@ -312,46 +312,86 @@ export const miniMaxBestAlphaBetaWithLookupTable = (
   }
 };
 
-/*
+let weights = {
+  0: 0,
+  1: 1,
+  2: 2,
+  3: 3,
+  4: 2,
+  5: 1,
+  6: 0,
+};
 
-To summarize the heuristics that we've tried:
+const sortByCenter = (x: [number, number], y: [number, number]) => {
+  return weights[y[1]] - weights[x[1]];
+};
 
-[1] Center column
+export const miniMaxBestAlphaBetaWithMoveOrdering = (
+  board: Board,
+  depth: number,
+  isMaximizingPlayer: boolean,
+  alpha: number,
+  beta: number
+) => {
+  const moves = getAvailableMoves(board);
+  const winner = checkIfWinner(board);
 
-[2] Consider a slice of 4 positions:
-Count amount of player positions
+  const isTerminal = winner || moves.length === 0 || depth === 0;
 
-[3] Consider a slice of 4 positions:
-Count amount of player positions and empty slots
-If other player detected, set score to 0 
-  otherwise +2 for each player position and +0.5 for each empty
-  
-[4] Consider a slice of 4 positions:
-Count amount of player positions and empty slots
-Score 100 if 3 player and 1 empty
-Score 10 if 2 player and 2 empty
-Score 1 if 1 player and 3 empty
+  if (isTerminal) {
+    // check for winners
+    if (winner) {
+      if (winner === "AI") {
+        return 9999999;
+      } else {
+        return -99999999;
+      }
+    }
 
-[5] Combine [1] and [4] ai-minimax-best
-  
+    if (depth === 0) {
+      return scorePosition(board);
+    }
 
-Other things that can be done:
+    return 0;
+  }
 
-[x] Iterative Deepening: Instead of using a fixed depth for the minimax algorithm, you can implement an iterative deepening approach. Start with a depth of 1 and gradually increase it until a certain time limit is reached. This allows the AI to explore deeper levels of the game tree within the given time constraints.
+  if (isMaximizingPlayer) {
+    let valueMax = -Infinity;
 
-[-] Move Ordering: Implement move ordering heuristics to improve the effectiveness of alpha-beta pruning. Start by evaluating moves that are more likely to be good moves first. For example, prioritize moves in the center columns or moves that connect to existing AI pieces. This can help prune more branches early and improve the AI's decision-making process.
+    for (const [x, y] of moves.sort(sortByCenter)) {
+      board[x][y] = "AI";
 
-We could do this one by sorting the moves in the minimax algorithm - example heuristic:
+      const score = miniMaxBestAlphaBeta(board, depth - 1, false, alpha, beta);
 
-"The heuristic used prioritizes moves in the center columns of the board, as they are generally considered more strategically advantageous."
+      board[x][y] = null;
 
-[x] Transposition Table: Use a transposition table to store previously evaluated board positions and their associated scores. This can help avoid redundant evaluations and improve the efficiency of the AI's search. Ensure that you implement proper hash functions to generate unique keys for each board position.
+      valueMax = Math.max(score, valueMax);
+      alpha = Math.max(alpha, valueMax);
 
-[x] Evaluation Function: Enhance the evaluation function (scorePosition) to consider more advanced patterns and strategic elements. For example, assign higher scores to positions that create multiple potential winning opportunities or positions that block the opponent's potential wins. Additionally, consider factors like mobility, central control, and open columns when evaluating the board state.
+      if (beta <= alpha) {
+        break; // Beta cutoff
+      }
+    }
 
-[] Monte Carlo Tree Search (MCTS): Consider implementing Monte Carlo Tree Search, which combines tree search and random simulations to make decisions. MCTS can be particularly effective in games with large branching factors like Connect 4. It allows the AI to explore different lines of play more effectively and make smarter decisions.
+    return valueMax;
+  } else {
+    let valueMin = Infinity;
 
-[] Machine Learning: Train a neural network or other machine learning models to learn from large datasets of Connect 4 games. The AI can use the learned knowledge to make smarter decisions based on patterns and strategies observed during training.
+    for (const [x, y] of moves.sort(sortByCenter)) {
+      board[x][y] = "HUMAN";
 
-By combining these strategies and enhancements, you can create an even smarter Connect 4 AI that can make strategic decisions, explore the game tree efficiently, and adapt to different gameplay scenarios.
-*/
+      const score = miniMaxBestAlphaBeta(board, depth - 1, true, alpha, beta);
+
+      board[x][y] = null;
+
+      valueMin = Math.min(score, valueMin);
+      beta = Math.min(beta, valueMin);
+
+      if (beta <= alpha) {
+        break; // Alpha cutoff
+      }
+    }
+
+    return valueMin;
+  }
+};

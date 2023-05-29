@@ -3,8 +3,8 @@ import {
   ROW_LENGTH,
   checkIfWinner,
   getAvailableMoves,
-} from "./shared";
-import { Board, BoardPosition, Player } from "./types";
+} from "../shared";
+import { Board, BoardPosition, Player } from "../types";
 
 const PLAYER_SCORE = 2;
 const EMPTY_SORE = 0.5;
@@ -90,15 +90,15 @@ export const checkAllFour = (board: Board, player: Player) => {
   return score;
 };
 
-export const fourInALineAiIterativeDeepning = (
+export const miniMaxSecondBest = (
   board: Board,
-  maxDepth: number,
+  depth: number,
   isMaximizingPlayer: boolean
 ): number => {
   const moves = getAvailableMoves(board);
   const winner = checkIfWinner(board);
 
-  const isTerminal = winner || moves.length === 0 || maxDepth === 0;
+  const isTerminal = winner || moves.length === 0 || depth === 0;
 
   if (isTerminal) {
     // check for winners
@@ -110,7 +110,7 @@ export const fourInALineAiIterativeDeepning = (
       }
     }
 
-    if (maxDepth === 0) {
+    if (depth === 0) {
       return checkAllFour(board, "AI");
     }
 
@@ -123,7 +123,7 @@ export const fourInALineAiIterativeDeepning = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = fourInALineAiIterativeDeepning(board, maxDepth - 1, false);
+      const score = miniMaxSecondBest(board, depth - 1, false);
 
       board[x][y] = null;
 
@@ -136,7 +136,7 @@ export const fourInALineAiIterativeDeepning = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = fourInALineAiIterativeDeepning(board, maxDepth - 1, true);
+      const score = miniMaxSecondBest(board, depth - 1, true);
 
       board[x][y] = null;
 
@@ -146,9 +146,90 @@ export const fourInALineAiIterativeDeepning = (
   }
 };
 
+export const miniMaxSecondBestAlphaBeta = (
+  board: Board,
+  depth: number,
+  isMaximizingPlayer: boolean,
+  alpha: number,
+  beta: number
+): number => {
+  const moves = getAvailableMoves(board);
+  const winner = checkIfWinner(board);
+
+  const isTerminal = winner || moves.length === 0 || depth === 0;
+
+  if (isTerminal) {
+    // check for winners
+    if (winner) {
+      if (winner === "AI") {
+        return 9999999;
+      } else {
+        return -99999999;
+      }
+    }
+
+    if (depth === 0) {
+      return checkAllFour(board, "AI");
+    }
+
+    return 0;
+  }
+
+  if (isMaximizingPlayer) {
+    let valueMax = -Infinity;
+
+    for (const [x, y] of moves) {
+      board[x][y] = "AI";
+
+      const score = miniMaxSecondBestAlphaBeta(
+        board,
+        depth - 1,
+        false,
+        alpha,
+        beta
+      );
+
+      board[x][y] = null;
+
+      valueMax = Math.max(score, valueMax);
+
+      alpha = Math.max(alpha, valueMax);
+
+      if (beta <= alpha) {
+        break; // Beta cutoff
+      }
+    }
+    return valueMax;
+  } else {
+    let valueMin = Infinity;
+
+    for (const [x, y] of moves) {
+      board[x][y] = "HUMAN";
+
+      const score = miniMaxSecondBestAlphaBeta(
+        board,
+        depth - 1,
+        true,
+        alpha,
+        beta
+      );
+
+      board[x][y] = null;
+
+      valueMin = Math.min(score, valueMin);
+      beta = Math.min(beta, valueMin);
+
+      if (beta <= alpha) {
+        break; // Alpha cutoff
+      }
+    }
+    return valueMin;
+  }
+};
+
 const transTable = new Map();
 
-export const fourInALineAiIterativeDeepningWithTransportationTable = (
+export const miniMaxSecondBestTransTable = (
   board: Board,
   maxDepth: number,
   isMaximizingPlayer: boolean
@@ -176,7 +257,7 @@ export const fourInALineAiIterativeDeepningWithTransportationTable = (
   }
 
   // should be hashed instead of storing this big of an object.
-  const boardKey = { board: JSON.stringify(board), depth: maxDepth };
+  const boardKey = JSON.stringify(board);
 
   if (transTable.has(boardKey)) {
     return transTable.get(boardKey);
@@ -188,11 +269,7 @@ export const fourInALineAiIterativeDeepningWithTransportationTable = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = fourInALineAiIterativeDeepningWithTransportationTable(
-        board,
-        maxDepth - 1,
-        false
-      );
+      const score = miniMaxSecondBestTransTable(board, maxDepth - 1, false);
 
       board[x][y] = null;
 
@@ -207,11 +284,7 @@ export const fourInALineAiIterativeDeepningWithTransportationTable = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = fourInALineAiIterativeDeepningWithTransportationTable(
-        board,
-        maxDepth - 1,
-        true
-      );
+      const score = miniMaxSecondBestTransTable(board, maxDepth - 1, true);
 
       board[x][y] = null;
 

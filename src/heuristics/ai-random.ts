@@ -1,4 +1,9 @@
-export const aiRandomMove = (moves: [number, number][]) => {
+import { getAvailableMoves } from "../shared";
+import { Board } from "../types";
+
+export const aiRandomMove = (board: Board) => {
+  const moves = getAvailableMoves(board);
+
   const numberOfMoves = moves.length;
 
   const randomInteger = Math.floor(Math.random() * numberOfMoves);
