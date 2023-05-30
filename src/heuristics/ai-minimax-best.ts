@@ -273,7 +273,7 @@ export const miniMaxBestAlphaBetaWithLookupTable = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = miniMaxBestAlphaBeta(board, depth - 1, false, alpha, beta);
+      const score = miniMaxBestAlphaBetaWithLookupTable(board, depth - 1, false, alpha, beta);
 
       board[x][y] = null;
 
@@ -294,7 +294,7 @@ export const miniMaxBestAlphaBetaWithLookupTable = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = miniMaxBestAlphaBeta(board, depth - 1, true, alpha, beta);
+      const score = miniMaxBestAlphaBetaWithLookupTable(board, depth - 1, true, alpha, beta);
 
       board[x][y] = null;
 
@@ -361,7 +361,7 @@ export const miniMaxBestAlphaBetaWithMoveOrdering = (
     for (const [x, y] of moves.sort(sortByCenter)) {
       board[x][y] = "AI";
 
-      const score = miniMaxBestAlphaBeta(board, depth - 1, false, alpha, beta);
+      const score = miniMaxBestAlphaBetaWithMoveOrdering(board, depth - 1, false, alpha, beta);
 
       board[x][y] = null;
 
@@ -380,7 +380,7 @@ export const miniMaxBestAlphaBetaWithMoveOrdering = (
     for (const [x, y] of moves.sort(sortByCenter)) {
       board[x][y] = "HUMAN";
 
-      const score = miniMaxBestAlphaBeta(board, depth - 1, true, alpha, beta);
+      const score = miniMaxBestAlphaBetaWithMoveOrdering(board, depth - 1, true, alpha, beta);
 
       board[x][y] = null;
 
