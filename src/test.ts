@@ -104,7 +104,8 @@ const main = ({
             depthPlayer1,
             true,
             -Infinity,
-            Infinity
+            Infinity,
+            "HUMAN"
           );
 
           board[x][y] = null;
@@ -134,7 +135,8 @@ const main = ({
           depthPlayer2,
           false,
           -Infinity,
-          Infinity
+          Infinity,
+          "AI"
         );
 
         board[x][y] = null;

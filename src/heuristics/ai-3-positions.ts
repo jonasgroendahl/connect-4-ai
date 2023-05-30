@@ -13,9 +13,9 @@ const coordsCheckThree = (
   player: Player
 ) => {
   if (first === player && second === player && third === player) {
-    return 8;
+    return player === "AI" ? 8 : -8;
   } else if (first === player && second === player) {
-    return 2;
+    return player === "AI" ? 2 : -2;
   }
 
   return 0;
@@ -74,7 +74,10 @@ export const checkIfTwoOrThreeInRow = (board: Board, player: Player) => {
 export const miniMaxThreePos = (
   board: Board,
   depth: number,
-  isMaximizingPlayer: boolean
+  isMaximizingPlayer: boolean,
+  alpha: number,
+  beta: number,
+  player: Player
 ): number => {
   const moves = getAvailableMoves(board);
   const winner = checkIfWinner(board);
@@ -92,7 +95,7 @@ export const miniMaxThreePos = (
     }
 
     if (depth === 0) {
-      return checkIfTwoOrThreeInRow(board, "AI");
+      return checkIfTwoOrThreeInRow(board, player);
     }
 
     return 0;
@@ -104,7 +107,7 @@ export const miniMaxThreePos = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = miniMaxThreePos(board, depth - 1, false);
+      const score = miniMaxThreePos(board, depth - 1, false, alpha, beta, player);
 
       board[x][y] = null;
 
@@ -117,7 +120,7 @@ export const miniMaxThreePos = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = miniMaxThreePos(board, depth - 1, true);
+      const score = miniMaxThreePos(board, depth - 1, true, alpha, beta, player);
 
       board[x][y] = null;
 
