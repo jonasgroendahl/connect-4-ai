@@ -32,7 +32,7 @@ const algorithmMap = (name: string, alphaBeta: boolean) => {
       }
       return miniMaxBest;
 
-    case "minimax-second-best":
+    case "4-positions":
       if (alphaBeta) {
         return miniMaxFourPositionsAlphaBeta;
       }
@@ -76,7 +76,7 @@ const main = async () => {
       when: function (answer) {
         return (
           answer.heuristic === "minimax-best" ||
-          answer.heuristic === "minimax-second-best"
+          answer.heuristic === "4-positions"
         );
       },
     },
