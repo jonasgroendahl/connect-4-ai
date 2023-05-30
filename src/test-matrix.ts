@@ -98,8 +98,8 @@ const main = ({
 
       if (iterativePlayer1) {
         bestMove = performIterativeDeeping(board, moves, algoPlayer1);
-      } else if (algoPlayer1.name === "aiRandomMove") {
-          bestMove = randomMove(board);
+      } else if (algoPlayer1.name === randomMove.name) {
+        bestMove = randomMove(board);
       } else {
         // go through all available moves, find the one with highest score
         for (const move of moves) {
@@ -223,7 +223,7 @@ const runTests = () => {
     outcomes.forEach((outcome) => {
       if (outcome === "AI") {
         aiWins++;
-        totalScore[name2] = (totalScore[name1] || 0) + 1;
+        totalScore[name2] = (totalScore[name2] || 0) + 1;
       } else if (outcome === "HUMAN") {
         humanWins++;
         totalScore[name1] = (totalScore[name1] || 0) + 1;
@@ -235,7 +235,7 @@ const runTests = () => {
     console.log(`${name1}${test.depthPlayer1} ${name2}${test.depthPlayer2} ${humanWins},${draw},${aiWins}`);
   }
 
-  console.log("Total", totalScore);
+  console.log("Total scores", totalScore);
 };
 
 const algorithmsMiniMaxTest = [
@@ -245,7 +245,6 @@ const algorithmsMiniMaxTest = [
   miniMaxCheckWinLose,
   miniMaxCheckWin,
   miniMaxBest,
-  randomMove
 ];
 
 const algorithmsTimeTest = [
@@ -273,7 +272,7 @@ const allAlgorithms = [
 
 
 const generateTests = () => {
-  const depths = [4];
+  const depths = [2,4];
   // const startPlayers = ["AI", "HUMAN"];
   const startPlayers = [""];
   const algorithms = algorithmsMiniMaxTest;
