@@ -11,9 +11,9 @@ import {
 } from "./heuristics/ai-minimax-best";
 import inquirer from "inquirer";
 import {
-  miniMaxSecondBest,
-  miniMaxSecondBestAlphaBeta,
-} from "./heuristics/ai-minimax-second-best";
+  miniMaxFourPositions,
+  miniMaxFourPositionsAlphaBeta,
+} from "./heuristics/ai-4.positions";
 import { miniMaxCenter } from "./heuristics/ai-center";
 import { miniMaxCheckWin } from "./heuristics/ai-check-win";
 import { miniMaxCheckWinLose } from "./heuristics/ai-check-win-lose";
@@ -34,9 +34,9 @@ const algorithmMap = (name: string, alphaBeta: boolean) => {
 
     case "minimax-second-best":
       if (alphaBeta) {
-        return miniMaxSecondBestAlphaBeta;
+        return miniMaxFourPositionsAlphaBeta;
       }
-      return miniMaxSecondBest;
+      return miniMaxFourPositions;
     case "center":
       return miniMaxCenter;
     case "check-win":
@@ -57,11 +57,11 @@ const main = async () => {
   const choices = await inquirer.prompt([
     {
       name: "heuristic",
-      message: "Choose heuristic",
+      message: "Choose heuristic / Algorithm",
       choices: [
         "random",
         "minimax-best",
-        "minimax-second-best",
+        "4-positions",
         "3-positions",
         "center",
         "check-win",

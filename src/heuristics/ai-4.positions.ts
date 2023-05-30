@@ -90,7 +90,7 @@ export const checkAllFour = (board: Board, player: Player) => {
   return score;
 };
 
-export const miniMaxSecondBest = (
+export const miniMaxFourPositions = (
   board: Board,
   depth: number,
   isMaximizingPlayer: boolean
@@ -123,7 +123,7 @@ export const miniMaxSecondBest = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = miniMaxSecondBest(board, depth - 1, false);
+      const score = miniMaxFourPositions(board, depth - 1, false);
 
       board[x][y] = null;
 
@@ -136,7 +136,7 @@ export const miniMaxSecondBest = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = miniMaxSecondBest(board, depth - 1, true);
+      const score = miniMaxFourPositions(board, depth - 1, true);
 
       board[x][y] = null;
 
@@ -146,7 +146,7 @@ export const miniMaxSecondBest = (
   }
 };
 
-export const miniMaxSecondBestAlphaBeta = (
+export const miniMaxFourPositionsAlphaBeta = (
   board: Board,
   depth: number,
   isMaximizingPlayer: boolean,
@@ -181,7 +181,7 @@ export const miniMaxSecondBestAlphaBeta = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = miniMaxSecondBestAlphaBeta(
+      const score = miniMaxFourPositionsAlphaBeta(
         board,
         depth - 1,
         false,
@@ -206,7 +206,7 @@ export const miniMaxSecondBestAlphaBeta = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = miniMaxSecondBestAlphaBeta(
+      const score = miniMaxFourPositionsAlphaBeta(
         board,
         depth - 1,
         true,

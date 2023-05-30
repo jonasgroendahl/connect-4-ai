@@ -15,7 +15,7 @@ import {
   miniMaxBest,
   miniMaxBestAlphaBeta,
 } from "./heuristics/ai-minimax-best";
-import { miniMaxSecondBest } from "./heuristics/ai-minimax-second-best";
+import { miniMaxFourPositions } from "./heuristics/ai-4.positions";
 
 const printBoard = (board: Board) => {
   console.table(board);
@@ -209,7 +209,7 @@ const tests: MainArgs[] = [
   {
     name: "Minimax best vs 2-3-opens-ends - Depth 3 vs depth 3",
     algoPlayer1: miniMaxBest,
-    algoPlayer2: miniMaxSecondBest,
+    algoPlayer2: miniMaxFourPositions,
     depthPlayer1: 3,
     depthPlayer2: 3,
     playerStarts: "HUMAN",
@@ -217,7 +217,7 @@ const tests: MainArgs[] = [
   {
     name: "Minimax best vs 2-3-opens-ends - Depth 3 vs depth 4",
     algoPlayer1: miniMaxBest,
-    algoPlayer2: miniMaxSecondBest,
+    algoPlayer2: miniMaxFourPositions,
     depthPlayer1: 3,
     depthPlayer2: 4,
     playerStarts: "HUMAN",
@@ -225,7 +225,7 @@ const tests: MainArgs[] = [
   {
     name: "Minimax best vs 2-3-opens-ends - Depth 2 vs depth 4",
     algoPlayer1: miniMaxBest,
-    algoPlayer2: miniMaxSecondBest,
+    algoPlayer2: miniMaxFourPositions,
     depthPlayer1: 2,
     depthPlayer2: 4,
     playerStarts: "HUMAN",
