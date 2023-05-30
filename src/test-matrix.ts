@@ -78,6 +78,8 @@ const main = ({
   const board = JSON.parse(JSON.stringify(crazyBoard)) as Board;
 
   const timeSpent = [0, 0];
+  let movesPlayer1 = 0;
+  let movesPlayer2 = 0;
 
   let usersTurn: Player = playerStarts ?? "HUMAN";
 
@@ -125,6 +127,7 @@ const main = ({
       }
       const endTime = process.hrtime(startTime);
       timeSpent[0] += (endTime[0] * 1e9 + endTime[1]) / 1e6;
+      movesPlayer1++;
     } else {
       let bestScore = -Infinity;
 
@@ -154,6 +157,7 @@ const main = ({
 
       const endTime = process.hrtime(startTime);
       timeSpent[1] += (endTime[0] * 1e9 + endTime[1]) / 1e6;
+      movesPlayer2++;
     }
     move = bestMove;
 
@@ -187,29 +191,34 @@ const main = ({
     outcome: outcome,
     timeSpentPlayer1: timeSpent[0],
     timeSpentPlayer2: timeSpent[1],
+    movesPlayer1: movesPlayer1,
+    movesPlayer2: movesPlayer2
   };
 };
 
 
-const runTests = () => {
-  console.log("Player1 Player2 Result");
+const runTests = (timeTests: Boolean) => {
+  console.log("Player1 Player2 Result Time1 Time2");
 
   const totalScore = {};
 
-  const tests = generateTests();
+  const tests = timeTests ? generateTimeTests() : generateTests();
   for (const test of tests) {
     let round = 0;
     let outcomes: GameOutcome[] = [];
     let timeSpent = [0, 0];
+    let movesPlayer1 = 0;
+    let movesPlayer2 = 0;
 
-    while (round <= 1) {
+    while (round <= 0) {
       // TODO: improve switching players and summarize score
       test.playerStarts = round % 2 == 0 ? "HUMAN" : "AI";
       const result = main(test);
       outcomes.push(result.outcome);
       timeSpent[0] += result.timeSpentPlayer1;
       timeSpent[1] += result.timeSpentPlayer2;
-
+      movesPlayer1 += result.movesPlayer1;
+      movesPlayer2 += result.movesPlayer2;
       round++;
     }
 
@@ -217,8 +226,8 @@ const runTests = () => {
     let humanWins = 0;
     let draw = 0;
 
-    const name1 = test.algoPlayer1.name[0].toUpperCase() + test.algoPlayer1.name.replace(/[^A-Z]+/g, "");
-    const name2 = test.algoPlayer2.name[0].toUpperCase() + test.algoPlayer2.name.replace(/[^A-Z]+/g, "");
+    const name1 = test.algoPlayer1.name[0].toUpperCase() + test.algoPlayer1.name.replace(/[^A-Z]+/g, "") + test.depthPlayer1;
+    const name2 = test.algoPlayer2.name[0].toUpperCase() + test.algoPlayer2.name.replace(/[^A-Z]+/g, "") + test.depthPlayer2;
 
     outcomes.forEach((outcome) => {
       if (outcome === "AI") {
@@ -232,7 +241,10 @@ const runTests = () => {
       }
     });
     
-    console.log(`${name1}${test.depthPlayer1} ${name2}${test.depthPlayer2} ${humanWins},${draw},${aiWins}`);
+    let averageTime = ((timeSpent[0]+timeSpent[1])/(movesPlayer1 + movesPlayer2)).toFixed(2)
+
+    console.log(`${name1} ${name2} ${humanWins},${draw},${aiWins} ${averageTime}`);
+    // console.log(`${name1} ${name2} ${humanWins},${draw},${aiWins} ${(timeSpent[0]/movesPlayer1).toFixed(2)} ${(timeSpent[1]/movesPlayer2).toFixed(2)} ${averageTime}`);
   }
 
   console.log("Total scores", totalScore);
@@ -270,13 +282,43 @@ const allAlgorithms = [
   randomMove
 ];
 
-
-const generateTests = () => {
+const generateTimeTests = () => {
   const depths = [2,4];
   // const startPlayers = ["AI", "HUMAN"];
   const startPlayers = [""];
+  const algorithms = algorithmsTimeTest;
+
+  algorithms.sort(function(a, b){
+    return b.name.localeCompare(a.name); });
+
+  const tests = [];
+
+  for (let i1 = 0; i1 < algorithms.length; i1++) {
+    const alg1 = algorithms[i1];
+
+      for (const alt1_depth of depths) {
+
+        for (const startPlayer of startPlayers) {
+          tests.push({
+            algoPlayer1: alg1,
+            algoPlayer2: alg1,
+            depthPlayer1: alt1_depth,
+            depthPlayer2: alt1_depth,
+            playerStarts: startPlayer,
+          });
+        }
+    }
+  }
+
+  return tests;
+}
+
+
+const generateTests = () => {
+  const depths = [2,6];
+  // const startPlayers = ["AI", "HUMAN"];
+  const startPlayers = [""];
   const algorithms = algorithmsMiniMaxTest;
-  // const algorithms = algorithmsTimeTest;
 
   algorithms.sort(function(a, b){
     return b.name.localeCompare(a.name); });
@@ -314,4 +356,4 @@ const generateTests = () => {
   return tests;
 }
 
-runTests();
+runTests(false);

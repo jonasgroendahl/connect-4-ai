@@ -70,6 +70,8 @@ const main = ({
   const board = JSON.parse(JSON.stringify(crazyBoard)) as Board;
 
   const timeSpent = [0, 0];
+  let movesPlayer1 = 0;
+  let movesPlayer2 = 0;
 
   let usersTurn: Player = playerStarts ?? "HUMAN";
 
@@ -115,6 +117,7 @@ const main = ({
       }
       const endTime = process.hrtime(startTime);
       timeSpent[0] += (endTime[0] * 1e9 + endTime[1]) / 1e6;
+      movesPlayer1++;
     } else {
       let bestScore = -Infinity;
 
@@ -144,6 +147,7 @@ const main = ({
 
       const endTime = process.hrtime(startTime);
       timeSpent[1] += (endTime[0] * 1e9 + endTime[1]) / 1e6;
+      movesPlayer2++;
     }
     move = bestMove;
 
@@ -177,6 +181,8 @@ const main = ({
     outcome: outcome,
     timeSpentPlayer1: timeSpent[0],
     timeSpentPlayer2: timeSpent[1],
+    movesPlayer1: movesPlayer1,
+    movesPlayer2: movesPlayer2
   };
 };
 
