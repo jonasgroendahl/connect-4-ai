@@ -1,7 +1,7 @@
 import { getAvailableMoves } from "../shared";
 import { Board } from "../types";
 
-export const aiRandomMove = (board: Board) => {
+export const randomMove = (board: Board) => {
   const moves = getAvailableMoves(board);
 
   const numberOfMoves = moves.length;

@@ -395,3 +395,85 @@ export const miniMaxBestAlphaBetaWithMoveOrdering = (
     return valueMin;
   }
 };
+
+const transTableMoveOrdering = new Map();
+
+export const miniMaxBestAlphaBetaWithMoveOrderingAndLookupTable = (
+  board: Board,
+  depth: number,
+  isMaximizingPlayer: boolean,
+  alpha: number,
+  beta: number
+) => {
+  const moves = getAvailableMoves(board);
+  const winner = checkIfWinner(board);
+
+  const isTerminal = winner || moves.length === 0 || depth === 0;
+
+  if (isTerminal) {
+    // check for winners
+    if (winner) {
+      if (winner === "AI") {
+        return 9999999;
+      } else {
+        return -99999999;
+      }
+    }
+
+    if (depth === 0) {
+      return scorePosition(board);
+    }
+
+    return 0;
+  }
+
+  const boardKey = JSON.stringify(board);
+
+  if (transTableMoveOrdering.has(boardKey)) {
+    return transTableMoveOrdering.get(boardKey);
+  }
+
+  if (isMaximizingPlayer) {
+    let valueMax = -Infinity;
+
+    for (const [x, y] of moves.sort(sortByCenter)) {
+      board[x][y] = "AI";
+
+      const score = miniMaxBestAlphaBetaWithMoveOrderingAndLookupTable(board, depth - 1, false, alpha, beta);
+
+      board[x][y] = null;
+
+      valueMax = Math.max(score, valueMax);
+      alpha = Math.max(alpha, valueMax);
+
+      if (beta <= alpha) {
+        break; // Beta cutoff
+      }
+    }
+
+    transTableMoveOrdering.set(boardKey, valueMax);
+    return valueMax;
+  } else {
+    let valueMin = Infinity;
+
+    for (const [x, y] of moves.sort(sortByCenter)) {
+      board[x][y] = "HUMAN";
+
+      const score = miniMaxBestAlphaBetaWithMoveOrderingAndLookupTable(board, depth - 1, true, alpha, beta);
+
+      board[x][y] = null;
+
+      valueMin = Math.min(score, valueMin);
+      beta = Math.min(beta, valueMin);
+
+      if (beta <= alpha) {
+        break; // Alpha cutoff
+      }
+    }
+
+    transTableMoveOrdering.set(boardKey, valueMin);
+    return valueMin;
+  }
+};
+
+
