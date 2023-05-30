@@ -8,7 +8,5 @@ export const aiRandomMove = (board: Board) => {
 
   const randomInteger = Math.floor(Math.random() * numberOfMoves);
 
-  console.log(moves, randomInteger);
-
   return moves[randomInteger];
 };

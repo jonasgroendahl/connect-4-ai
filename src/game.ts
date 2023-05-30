@@ -17,6 +17,8 @@ import {
 import { miniMaxCenter } from "./heuristics/ai-center";
 import { miniMaxCheckWin } from "./heuristics/ai-check-win";
 import { miniMaxCheckWinLose } from "./heuristics/ai-check-win-lose";
+import { aiRandomMove } from "./heuristics/ai-random";
+import { miniMaxThreePos } from "./heuristics/ai-3-positions";
 
 const printBoard = (board: Board) => {
   console.table(board);
@@ -41,6 +43,8 @@ const algorithmMap = (name: string, alphaBeta: boolean) => {
       return miniMaxCheckWin;
     case "check-win-lose":
       return miniMaxCheckWinLose;
+    case "3-positions":
+      return miniMaxThreePos;
   }
 };
 
@@ -55,8 +59,10 @@ const main = async () => {
       name: "heuristic",
       message: "Choose heuristic",
       choices: [
+        "random",
         "minimax-best",
         "minimax-second-best",
+        "3-positions",
         "center",
         "check-win",
         "check-win-lose",
@@ -83,6 +89,9 @@ const main = async () => {
           return true;
         }
         return "Please enter a number between 0 and 10.";
+      },
+      when: function (answer) {
+        return answer.heuristic !== "random";
       },
     },
   ]);
@@ -114,22 +123,26 @@ const main = async () => {
 
       const startTime = process.hrtime();
 
-      // go through all available moves, find the one with highest score
-      for (const move of moves) {
-        const [x, y] = move;
+      if (choices.heuristic === "random") {
+        bestMove = aiRandomMove(board);
+      } else {
+        // go through all available moves, find the one with highest score
+        for (const move of moves) {
+          const [x, y] = move;
 
-        board[x][y] = "AI";
+          board[x][y] = "AI";
 
-        const score = algorithmMap(
-          choices.heuristic,
-          choices?.["alpha-beta"] ?? false
-        )(board, choices.depth, false, -Infinity, Infinity);
+          const score = algorithmMap(
+            choices.heuristic,
+            choices?.["alpha-beta"] ?? false
+          )(board, choices.depth, false, -Infinity, Infinity);
 
-        board[x][y] = null;
+          board[x][y] = null;
 
-        if (score > bestScore) {
-          bestScore = score;
-          bestMove = move;
+          if (score > bestScore) {
+            bestScore = score;
+            bestMove = move;
+          }
         }
       }
 
@@ -166,9 +179,17 @@ const main = async () => {
     printBoard(board);
   }
 
-  console.log(
-    `Game over. Outcome: ${outcome} ${outcome !== "DRAW" && "wins"} `
-  );
+  let finalMessage = "Game over. Outcome: ";
+
+  if (outcome === "AI") {
+    finalMessage += `AI wins 🤖`;
+  } else if (outcome === "HUMAN") {
+    finalMessage += `Human wins 🧍`;
+  } else {
+    finalMessage += "Draw";
+  }
+
+  console.log(finalMessage);
 };
 
 main();
