@@ -29,7 +29,7 @@ const printBoard = (board: Board) => {
   console.table(board);
 };
 
-const TIME_LIMIT = 300;
+const TIME_LIMIT = 1000;
 
 // allow the first player to use iterative deepening with this helper
 const performIterativeDeeping = (
@@ -114,7 +114,8 @@ const main = ({
             depthPlayer1,
             true,
             -Infinity,
-            Infinity
+            Infinity,
+            "HUMAN"
           );
 
           board[x][y] = null;
@@ -144,7 +145,8 @@ const main = ({
           depthPlayer2,
           false,
           -Infinity,
-          Infinity
+          Infinity,
+          "AI"
         );
 
         board[x][y] = null;
@@ -198,7 +200,8 @@ const main = ({
 
 
 const runTests = (timeTests: Boolean) => {
-  console.log("Player1 Player2 Result Time1 Time2");
+  console.log("Player1 Player2 Result");
+  // console.log("Player1 Player2 Result Time");
 
   const totalScore = {};
 
@@ -210,7 +213,7 @@ const runTests = (timeTests: Boolean) => {
     let movesPlayer1 = 0;
     let movesPlayer2 = 0;
 
-    while (round <= 0) {
+    while (round <= 1) {
       // TODO: improve switching players and summarize score
       test.playerStarts = round % 2 == 0 ? "HUMAN" : "AI";
       const result = main(test);
@@ -243,7 +246,9 @@ const runTests = (timeTests: Boolean) => {
     
     let averageTime = ((timeSpent[0]+timeSpent[1])/(movesPlayer1 + movesPlayer2)).toFixed(2)
 
-    console.log(`${name1} ${name2} ${humanWins},${draw},${aiWins} ${averageTime}`);
+    console.log(`${name1} ${name2} ${humanWins},${draw},${aiWins}`);
+
+    // console.log(`${name1} ${name2} ${humanWins},${draw},${aiWins} ${averageTime}`);
     // console.log(`${name1} ${name2} ${humanWins},${draw},${aiWins} ${(timeSpent[0]/movesPlayer1).toFixed(2)} ${(timeSpent[1]/movesPlayer2).toFixed(2)} ${averageTime}`);
   }
 
@@ -265,6 +270,11 @@ const algorithmsTimeTest = [
   miniMaxBestAlphaBetaWithLookupTable,
   miniMaxBestAlphaBetaWithMoveOrdering,
   miniMaxBestAlphaBetaWithMoveOrderingAndLookupTable
+];
+
+const algorithmsIterativeTest = [
+  miniMaxBest,
+  miniMaxBest,
 ];
 
 const allAlgorithms = [
@@ -315,7 +325,7 @@ const generateTimeTests = () => {
 
 
 const generateTests = () => {
-  const depths = [2,6];
+  const depths = [2,4];
   // const startPlayers = ["AI", "HUMAN"];
   const startPlayers = [""];
   const algorithms = algorithmsMiniMaxTest;
@@ -325,13 +335,13 @@ const generateTests = () => {
 
   const tests = [];
 
-  for (let i1 = 0; i1 < algorithms.length; i1++) {
-    const alg1 = algorithms[i1];
-  // for (const alg1 of algorithms) {
+  // for (let i1 = 0; i1 < algorithms.length; i1++) {
+  //   const alg1 = algorithms[i1];
+  for (const alg1 of algorithms) {
   
-    for (let i2 = i1; i2 < algorithms.length; i2++) {
-      const alg2 = algorithms[i2];
-    // for (const alg2 of algorithms) {
+    // for (let i2 = i1; i2 < algorithms.length; i2++) {
+    //   const alg2 = algorithms[i2];
+    for (const alg2 of algorithms) {
 
       for (const alt1_depth of depths) {
         for (const alt2_depth of depths) {

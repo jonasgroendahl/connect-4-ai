@@ -68,7 +68,8 @@ export type MinimaxAlgo = (
   depth: number,
   isMaximizingPlayer: boolean,
   alpha?: number,
-  beta?: number
+  beta?: number,
+  currentPlayer?: Player
 ) => number;
 
 export type MainArgs = {

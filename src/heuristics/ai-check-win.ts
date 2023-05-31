@@ -1,10 +1,13 @@
 import { checkIfWinner, getAvailableMoves } from "../shared";
-import { Board } from "../types";
+import { Board, Player } from "../types";
 
 export const miniMaxCheckWin = (
   board: Board,
   depth: number,
-  isMaximizingPlayer: boolean
+  isMaximizingPlayer: boolean,
+  alpha: number,
+  beta: number,
+  player: Player
 ): number => {
   const moves = getAvailableMoves(board);
   const winner = checkIfWinner(board);
@@ -14,8 +17,10 @@ export const miniMaxCheckWin = (
   if (isTerminal) {
     // check for winners
     if (winner) {
-      if (winner === "AI") {
+      if (winner === "AI" && player === "AI") {
         return 9999999;
+      } else if (winner === "HUMAN" && player === "HUMAN") {
+        return -9999999;
       }
     }
 
@@ -28,7 +33,7 @@ export const miniMaxCheckWin = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = miniMaxCheckWin(board, depth - 1, false);
+      const score = miniMaxCheckWin(board, depth - 1, false, alpha, beta, player);
 
       board[x][y] = null;
 
@@ -41,7 +46,7 @@ export const miniMaxCheckWin = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = miniMaxCheckWin(board, depth - 1, true);
+      const score = miniMaxCheckWin(board, depth - 1, true, alpha, beta, player);
 
       board[x][y] = null;
 

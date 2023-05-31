@@ -25,11 +25,19 @@ const coordsCheckFourPositions = (
     }
 
     if (postion === player) {
-      score += PLAYER_SCORE;
+      if (player === "AI") {
+        score += PLAYER_SCORE;
+      } else if (player === "HUMAN") {
+        score -= PLAYER_SCORE;
+      }
     }
 
     if (postion === null) {
-      score += EMPTY_SORE;
+      if (player === "AI") {
+        score += EMPTY_SORE;
+      } else if (player === "HUMAN") {
+        score -= EMPTY_SORE;
+      }
     }
   }
 
@@ -93,7 +101,10 @@ export const checkAllFour = (board: Board, player: Player) => {
 export const miniMaxFourPositions = (
   board: Board,
   depth: number,
-  isMaximizingPlayer: boolean
+  isMaximizingPlayer: boolean,
+  alpha: number,
+  beta: number,
+  player: Player
 ): number => {
   const moves = getAvailableMoves(board);
   const winner = checkIfWinner(board);
@@ -111,7 +122,7 @@ export const miniMaxFourPositions = (
     }
 
     if (depth === 0) {
-      return checkAllFour(board, "AI");
+      return checkAllFour(board, player);
     }
 
     return 0;
@@ -123,7 +134,7 @@ export const miniMaxFourPositions = (
     for (const [x, y] of moves) {
       board[x][y] = "AI";
 
-      const score = miniMaxFourPositions(board, depth - 1, false);
+      const score = miniMaxFourPositions(board, depth - 1, false, alpha, beta, player);
 
       board[x][y] = null;
 
@@ -136,7 +147,7 @@ export const miniMaxFourPositions = (
     for (const [x, y] of moves) {
       board[x][y] = "HUMAN";
 
-      const score = miniMaxFourPositions(board, depth - 1, true);
+      const score = miniMaxFourPositions(board, depth - 1, true, alpha, beta, player);
 
       board[x][y] = null;
 

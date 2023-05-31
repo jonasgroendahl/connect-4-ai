@@ -199,7 +199,7 @@ const main = async () => {
           const score = algorithmMap(
             choices.heuristic,
             choices?.["alpha-beta"] ?? false
-          )(board, choices.depth, false, -Infinity, Infinity);
+          )(board, choices.depth, false, -Infinity, Infinity, "AI");
 
           board[x][y] = null;
 
