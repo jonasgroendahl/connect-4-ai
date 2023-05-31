@@ -85,4 +85,6 @@ export type MainReturnType = {
   outcome: GameOutcome;
   timeSpentPlayer1: number;
   timeSpentPlayer2: number;
+  movesPlayer1: number;
+  movesPlayer2: number;
 };

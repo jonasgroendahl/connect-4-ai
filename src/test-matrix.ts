@@ -14,8 +14,16 @@ import {
 import {
   miniMaxBest,
   miniMaxBestAlphaBeta,
+  miniMaxBestAlphaBetaWithLookupTable,
+  miniMaxBestAlphaBetaWithMoveOrdering,
+  miniMaxBestAlphaBetaWithMoveOrderingAndLookupTable,
 } from "./heuristics/ai-minimax-best";
-import { miniMaxFourPositions } from "./heuristics/ai-4.positions";
+import { miniMaxFourPositions, miniMaxFourPositionsAlphaBeta, miniMaxSecondBestTransTable } from "./heuristics/ai-4.positions";
+import { miniMaxThreePos } from "./heuristics/ai-3-positions";
+import { miniMaxCenter } from "./heuristics/ai-center";
+import { miniMaxCheckWinLose } from "./heuristics/ai-check-win-lose";
+import { miniMaxCheckWin } from "./heuristics/ai-check-win";
+import { randomMove as randomMove } from "./heuristics/ai-random";
 
 const printBoard = (board: Board) => {
   console.table(board);
@@ -92,6 +100,8 @@ const main = ({
 
       if (iterativePlayer1) {
         bestMove = performIterativeDeeping(board, moves, algoPlayer1);
+      } else if (algoPlayer1.name === randomMove.name) {
+        bestMove = randomMove(board);
       } else {
         // go through all available moves, find the one with highest score
         for (const move of moves) {
@@ -186,80 +196,29 @@ const main = ({
   };
 };
 
-const tests: MainArgs[] = [
-  {
-    name: "Minimax vs Minimax - Best minimax - Depth 3",
-    algoPlayer1: miniMaxBest,
-    algoPlayer2: miniMaxBest,
-    depthPlayer1: 3,
-    depthPlayer2: 3,
-    playerStarts: "AI",
-    iterativePlayer1: true,
-  },
-  {
-    name: "Minimax vs Minimax Alpha Beta - Best minimax - Depth 3",
-    algoPlayer1: miniMaxBest,
-    algoPlayer2: miniMaxBestAlphaBeta,
-    depthPlayer1: 3,
-    depthPlayer2: 3,
-    playerStarts: "HUMAN",
-  },
-  {
-    name: "Minimax vs Minimax Alpha Beta - Best minimax - Depth 2",
-    algoPlayer1: miniMaxBest,
-    algoPlayer2: miniMaxBestAlphaBeta,
-    depthPlayer1: 2,
-    depthPlayer2: 2,
-    playerStarts: "HUMAN",
-  },
-  {
-    name: "Minimax best vs 2-3-opens-ends - Depth 3 vs depth 3",
-    algoPlayer1: miniMaxBest,
-    algoPlayer2: miniMaxFourPositions,
-    depthPlayer1: 3,
-    depthPlayer2: 3,
-    playerStarts: "HUMAN",
-  },
-  {
-    name: "Minimax best vs 2-3-opens-ends - Depth 3 vs depth 4",
-    algoPlayer1: miniMaxBest,
-    algoPlayer2: miniMaxFourPositions,
-    depthPlayer1: 3,
-    depthPlayer2: 4,
-    playerStarts: "HUMAN",
-  },
-  {
-    name: "Minimax best vs 2-3-opens-ends - Depth 2 vs depth 4",
-    algoPlayer1: miniMaxBest,
-    algoPlayer2: miniMaxFourPositions,
-    depthPlayer1: 2,
-    depthPlayer2: 4,
-    playerStarts: "HUMAN",
-  },
-  {
-    name: "Minimax best vs 2-3-opens-ends - Depth 3 vs depth 2",
-    algoPlayer1: miniMaxBest,
-    algoPlayer2: miniMaxBestAlphaBeta,
-    depthPlayer1: 3,
-    depthPlayer2: 2,
-    playerStarts: "HUMAN",
-  },
-];
 
-const runTests = () => {
+const runTests = (timeTests: Boolean) => {
+  console.log("Player1 Player2 Result Time1 Time2");
+
+  const totalScore = {};
+
+  const tests = timeTests ? generateTimeTests() : generateTests();
   for (const test of tests) {
-    console.log("Running test", test.name);
-
     let round = 0;
     let outcomes: GameOutcome[] = [];
     let timeSpent = [0, 0];
+    let movesPlayer1 = 0;
+    let movesPlayer2 = 0;
 
-    while (round <= 3) {
+    while (round <= 0) {
+      // TODO: improve switching players and summarize score
+      test.playerStarts = round % 2 == 0 ? "HUMAN" : "AI";
       const result = main(test);
       outcomes.push(result.outcome);
       timeSpent[0] += result.timeSpentPlayer1;
       timeSpent[1] += result.timeSpentPlayer2;
-
+      movesPlayer1 += result.movesPlayer1;
+      movesPlayer2 += result.movesPlayer2;
       round++;
     }
 
@@ -267,30 +226,134 @@ const runTests = () => {
     let humanWins = 0;
     let draw = 0;
 
+    const name1 = test.algoPlayer1.name[0].toUpperCase() + test.algoPlayer1.name.replace(/[^A-Z]+/g, "") + test.depthPlayer1;
+    const name2 = test.algoPlayer2.name[0].toUpperCase() + test.algoPlayer2.name.replace(/[^A-Z]+/g, "") + test.depthPlayer2;
+
     outcomes.forEach((outcome) => {
       if (outcome === "AI") {
         aiWins++;
+        totalScore[name2] = (totalScore[name2] || 0) + 1;
       } else if (outcome === "HUMAN") {
         humanWins++;
+        totalScore[name1] = (totalScore[name1] || 0) + 1;
       } else {
         draw++;
       }
     });
+    
+    let averageTime = ((timeSpent[0]+timeSpent[1])/(movesPlayer1 + movesPlayer2)).toFixed(2)
 
-    console.log("Result for", test.name);
-    console.log({
-      player: "AI",
-      wins: aiWins,
-      time: timeSpent[1],
-    });
-    console.log({
-      player: "HUMAN",
-      wins: humanWins,
-      timeSpent: timeSpent[0],
-    });
-    console.log("draws", draw);
-    console.log("\n\n");
+    console.log(`${name1} ${name2} ${humanWins},${draw},${aiWins} ${averageTime}`);
+    // console.log(`${name1} ${name2} ${humanWins},${draw},${aiWins} ${(timeSpent[0]/movesPlayer1).toFixed(2)} ${(timeSpent[1]/movesPlayer2).toFixed(2)} ${averageTime}`);
   }
+
+  console.log("Total scores", totalScore);
 };
 
-runTests();
+const algorithmsMiniMaxTest = [
+  miniMaxThreePos,
+  miniMaxFourPositions,
+  miniMaxCenter,
+  miniMaxCheckWinLose,
+  miniMaxCheckWin,
+  miniMaxBest,
+];
+
+const algorithmsTimeTest = [
+  miniMaxBest,
+  miniMaxBestAlphaBeta,
+  miniMaxBestAlphaBetaWithLookupTable,
+  miniMaxBestAlphaBetaWithMoveOrdering,
+  miniMaxBestAlphaBetaWithMoveOrderingAndLookupTable
+];
+
+const allAlgorithms = [
+  miniMaxThreePos,
+  miniMaxFourPositions,
+  miniMaxFourPositionsAlphaBeta,
+  miniMaxSecondBestTransTable,
+  miniMaxCenter,
+  miniMaxCheckWinLose,
+  miniMaxCheckWin,
+  miniMaxBest,
+  miniMaxBestAlphaBeta,
+  miniMaxBestAlphaBetaWithLookupTable,
+  miniMaxBestAlphaBetaWithMoveOrdering,
+  randomMove
+];
+
+const generateTimeTests = () => {
+  const depths = [2,4];
+  // const startPlayers = ["AI", "HUMAN"];
+  const startPlayers = [""];
+  const algorithms = algorithmsTimeTest;
+
+  algorithms.sort(function(a, b){
+    return b.name.localeCompare(a.name); });
+
+  const tests = [];
+
+  for (let i1 = 0; i1 < algorithms.length; i1++) {
+    const alg1 = algorithms[i1];
+
+      for (const alt1_depth of depths) {
+
+        for (const startPlayer of startPlayers) {
+          tests.push({
+            algoPlayer1: alg1,
+            algoPlayer2: alg1,
+            depthPlayer1: alt1_depth,
+            depthPlayer2: alt1_depth,
+            playerStarts: startPlayer,
+          });
+        }
+    }
+  }
+
+  return tests;
+}
+
+
+const generateTests = () => {
+  const depths = [2,6];
+  // const startPlayers = ["AI", "HUMAN"];
+  const startPlayers = [""];
+  const algorithms = algorithmsMiniMaxTest;
+
+  algorithms.sort(function(a, b){
+    return b.name.localeCompare(a.name); });
+
+  const tests = [];
+
+  for (let i1 = 0; i1 < algorithms.length; i1++) {
+    const alg1 = algorithms[i1];
+  // for (const alg1 of algorithms) {
+  
+    for (let i2 = i1; i2 < algorithms.length; i2++) {
+      const alg2 = algorithms[i2];
+    // for (const alg2 of algorithms) {
+
+      for (const alt1_depth of depths) {
+        for (const alt2_depth of depths) {
+
+          if (alg1 != alg2 || alt1_depth != alt2_depth) {
+            for (const startPlayer of startPlayers) {
+              tests.push({
+                algoPlayer1: alg1,
+                algoPlayer2: alg2,
+                depthPlayer1: alt1_depth,
+                depthPlayer2: alt2_depth,
+                playerStarts: startPlayer,
+              });
+            }
+          }
+          
+        }
+      }
+    }
+  }
+
+  return tests;
+}
+
+runTests(false);

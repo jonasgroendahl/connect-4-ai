@@ -5,6 +5,7 @@
   "main": "./src/index.ts",
   "scripts": {
     "test": "tsc && node ./dist/test.js",
+    "test-matrix": "tsc && node ./dist/test-matrix.js",
     "start": "tsc && node ./dist/game.js"
   },
   "keywords": [],

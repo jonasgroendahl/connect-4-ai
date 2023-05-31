@@ -17,7 +17,7 @@ import {
 import { miniMaxCenter } from "./heuristics/ai-center";
 import { miniMaxCheckWin } from "./heuristics/ai-check-win";
 import { miniMaxCheckWinLose } from "./heuristics/ai-check-win-lose";
-import { aiRandomMove } from "./heuristics/ai-random";
+import { randomMove } from "./heuristics/ai-random";
 import { miniMaxThreePos } from "./heuristics/ai-3-positions";
 
 const printBoard = (board: Board) => {
@@ -181,7 +181,7 @@ const main = async () => {
       const startTime = process.hrtime();
 
       if (choices.heuristic === "random") {
-        bestMove = aiRandomMove(board);
+        bestMove = randomMove(board);
       } else if (choices.iterative) {
         bestMove = performIterativeDeeping(
           board,
