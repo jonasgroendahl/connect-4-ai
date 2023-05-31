@@ -16,10 +16,7 @@ import {
   miniMaxBestAlphaBeta,
 } from "./heuristics/ai-minimax-best";
 import { miniMaxFourPositions } from "./heuristics/ai-4.positions";
-
-const printBoard = (board: Board) => {
-  console.table(board);
-};
+import { miniMaxThreePos } from "./heuristics/ai-3-positions";
 
 const TIME_LIMIT = 300;
 
@@ -184,22 +181,21 @@ const main = ({
     timeSpentPlayer1: timeSpent[0],
     timeSpentPlayer2: timeSpent[1],
     movesPlayer1: movesPlayer1,
-    movesPlayer2: movesPlayer2
+    movesPlayer2: movesPlayer2,
   };
 };
 
 const tests: MainArgs[] = [
   {
-    name: "Minimax vs Minimax - Best minimax - Depth 3",
+    name: "Minimax Best vs Minimax Best",
     algoPlayer1: miniMaxBest,
     algoPlayer2: miniMaxBest,
     depthPlayer1: 3,
     depthPlayer2: 3,
     playerStarts: "AI",
-    iterativePlayer1: true,
   },
   {
-    name: "Minimax vs Minimax Alpha Beta - Best minimax - Depth 3",
+    name: "Minimax Best vs Minimax Best Alpha Beta",
     algoPlayer1: miniMaxBest,
     algoPlayer2: miniMaxBestAlphaBeta,
     depthPlayer1: 3,
@@ -207,7 +203,7 @@ const tests: MainArgs[] = [
     playerStarts: "HUMAN",
   },
   {
-    name: "Minimax vs Minimax Alpha Beta - Best minimax - Depth 2",
+    name: "Minimax Best vs Minimax Best Alpha Beta",
     algoPlayer1: miniMaxBest,
     algoPlayer2: miniMaxBestAlphaBeta,
     depthPlayer1: 2,
@@ -215,7 +211,7 @@ const tests: MainArgs[] = [
     playerStarts: "HUMAN",
   },
   {
-    name: "Minimax best vs 2-3-opens-ends - Depth 3 vs depth 3",
+    name: "Minimax Best vs Minimax 4 Positions",
     algoPlayer1: miniMaxBest,
     algoPlayer2: miniMaxFourPositions,
     depthPlayer1: 3,
@@ -223,7 +219,7 @@ const tests: MainArgs[] = [
     playerStarts: "HUMAN",
   },
   {
-    name: "Minimax best vs 2-3-opens-ends - Depth 3 vs depth 4",
+    name: "Minimax Best vs Minimax 4 Positions",
     algoPlayer1: miniMaxBest,
     algoPlayer2: miniMaxFourPositions,
     depthPlayer1: 3,
@@ -231,7 +227,7 @@ const tests: MainArgs[] = [
     playerStarts: "HUMAN",
   },
   {
-    name: "Minimax best vs 2-3-opens-ends - Depth 2 vs depth 4",
+    name: "Minimax Best vs Minimax 4 Positions",
     algoPlayer1: miniMaxBest,
     algoPlayer2: miniMaxFourPositions,
     depthPlayer1: 2,
@@ -239,24 +235,40 @@ const tests: MainArgs[] = [
     playerStarts: "HUMAN",
   },
   {
-    name: "Minimax best vs 2-3-opens-ends - Depth 3 vs depth 2",
+    name: "Minimax Best vs Minimax Alpha Beta",
     algoPlayer1: miniMaxBest,
     algoPlayer2: miniMaxBestAlphaBeta,
-    depthPlayer1: 3,
+    depthPlayer1: 4,
     depthPlayer2: 2,
     playerStarts: "HUMAN",
+  },
+  {
+    name: "Minimax 3 Positions vs Minimax 4 Positions",
+    algoPlayer1: miniMaxThreePos,
+    algoPlayer2: miniMaxFourPositions,
+    depthPlayer1: 3,
+    depthPlayer2: 3,
+    playerStarts: "HUMAN",
+  },
+  {
+    name: "Minimax 3 Positions vs Minimax 4 Positions",
+    algoPlayer1: miniMaxThreePos,
+    algoPlayer2: miniMaxFourPositions,
+    depthPlayer1: 3,
+    depthPlayer2: 3,
+    playerStarts: "AI",
   },
 ];
 
 const runTests = () => {
-  for (const test of tests) {
-    console.log("Running test", test.name);
+  console.log("Running tests - 3 rounds per match...");
 
+  for (const test of tests) {
     let round = 0;
     let outcomes: GameOutcome[] = [];
     let timeSpent = [0, 0];
 
-    while (round <= 3) {
+    while (round < 3) {
       const result = main(test);
       outcomes.push(result.outcome);
       timeSpent[0] += result.timeSpentPlayer1;
@@ -279,16 +291,18 @@ const runTests = () => {
       }
     });
 
-    console.log("Result for", test.name);
-    console.log({
-      player: "AI",
-      wins: aiWins,
-      time: timeSpent[1],
-    });
+    console.log("Result", test.name, `- ${test.playerStarts} starts`);
     console.log({
       player: "HUMAN",
       wins: humanWins,
       timeSpent: timeSpent[0],
+      depth: test.depthPlayer1,
+    });
+    console.log({
+      player: "AI",
+      wins: aiWins,
+      time: timeSpent[1],
+      depth: test.depthPlayer2,
     });
     console.log("draws", draw);
     console.log("\n\n");
