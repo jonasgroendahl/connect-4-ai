@@ -1,4 +1,4 @@
-import { Board, GameOutcome, Player } from "./types";
+import { Board, GameOutcome, MinimaxAlgo, Player } from "./types";
 import {
   board,
   checkIfWinner,
@@ -24,26 +24,59 @@ const printBoard = (board: Board) => {
   console.table(board);
 };
 
+export const performIterativeDeeping = (
+  board: Board,
+  moves: [number, number][],
+  algo: MinimaxAlgo,
+  timeLimit: number
+) => {
+  let bestMove = moves[0];
+  let bestScore = -Infinity;
+  const startTime = Date.now();
+  let currentDepth = 1;
+
+  while (Date.now() - startTime < timeLimit) {
+    // go through all available moves, find the one with highest score
+    for (const move of moves) {
+      const [x, y] = move;
+
+      board[x][y] = "AI";
+
+      const score = algo(board, currentDepth, false, -Infinity, Infinity);
+
+      board[x][y] = null;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestMove = move;
+      }
+    }
+  }
+
+  return bestMove;
+};
+
 const algorithmMap = (name: string, alphaBeta: boolean) => {
   switch (name) {
     case "minimax-best":
+    case "minimax-best-with-iterative-deepening":
       if (alphaBeta) {
         return miniMaxBestAlphaBeta;
       }
       return miniMaxBest;
 
-    case "4-positions":
+    case "minimax-4-positions":
       if (alphaBeta) {
         return miniMaxFourPositionsAlphaBeta;
       }
       return miniMaxFourPositions;
-    case "center":
+    case "minimax-center":
       return miniMaxCenter;
-    case "check-win":
+    case "minimax-check-win":
       return miniMaxCheckWin;
-    case "check-win-lose":
+    case "minimax-check-win-lose":
       return miniMaxCheckWinLose;
-    case "3-positions":
+    case "minimax-3-positions":
       return miniMaxThreePos;
   }
 };
@@ -61,11 +94,11 @@ const main = async () => {
       choices: [
         "random",
         "minimax-best",
-        "4-positions",
-        "3-positions",
-        "center",
-        "check-win",
-        "check-win-lose",
+        "minimax-4-positions",
+        "minimax-3-positions",
+        "minimax-center",
+        "minimax-check-win",
+        "minimax-check-win-lose",
       ],
       type: "list",
     },
@@ -76,14 +109,23 @@ const main = async () => {
       when: function (answer) {
         return (
           answer.heuristic === "minimax-best" ||
-          answer.heuristic === "4-positions"
+          answer.heuristic === "4-positions" ||
+          answer.heuristic === "minimax-best-with-iterative-deepening"
         );
+      },
+    },
+    {
+      name: "iterative",
+      message: "Use iterative deepening?",
+      type: "confirm",
+      when: function (answer) {
+        return answer.heuristic === "minimax-best";
       },
     },
     {
       name: "depth",
       message: "Depth",
-      type: "number",
+      type: "input",
       validate: function (value) {
         if (value >= 0 && value <= 10) {
           return true;
@@ -91,7 +133,22 @@ const main = async () => {
         return "Please enter a number between 0 and 10.";
       },
       when: function (answer) {
-        return answer.heuristic !== "random";
+        return answer.heuristic !== "random" && !answer.iterative;
+      },
+    },
+    {
+      name: "time",
+      message:
+        "Enter amount of time AI can use to make a move in milliseconds (eg. 1000 = 1 second)",
+      type: "input",
+      when: function (answer) {
+        return answer.iterative === true;
+      },
+      validate: function (value) {
+        if (value >= 0 && value <= 10000) {
+          return true;
+        }
+        return "Please enter a number between 0 and 10000.";
       },
     },
   ]);
@@ -106,7 +163,7 @@ const main = async () => {
         {
           name: "column",
           message: `👋 Choose column (0-6): `,
-          type: "number",
+          type: "input",
           validate: function (value) {
             if (value >= 0 && value <= 6) {
               return true;
@@ -125,6 +182,13 @@ const main = async () => {
 
       if (choices.heuristic === "random") {
         bestMove = randomMove(board);
+      } else if (choices.iterative) {
+        bestMove = performIterativeDeeping(
+          board,
+          moves,
+          algorithmMap(choices.heuristic, choices?.["alpha-beta"] ?? false),
+          choices.time
+        );
       } else {
         // go through all available moves, find the one with highest score
         for (const move of moves) {
