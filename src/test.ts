@@ -266,7 +266,7 @@ const runTests = () => {
     let outcomes: GameOutcome[] = [];
     let timeSpent = [0, 0];
 
-    while (round <= 3) {
+    while (round < 3) {
       const result = main(test);
       outcomes.push(result.outcome);
       timeSpent[0] += result.timeSpentPlayer1;
