@@ -24,7 +24,6 @@ const printBoard = (board: Board) => {
   console.table(board);
 };
 
-// allow the first player to use iterative deepening with this helper
 export const performIterativeDeeping = (
   board: Board,
   moves: [number, number][],
